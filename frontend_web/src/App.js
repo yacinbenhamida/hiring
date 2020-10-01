@@ -9,22 +9,31 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Typography } from '@material-ui/core';
-import CompanyDetails from './CompanyDetails';
+import { IconButton, Tooltip, Typography } from '@material-ui/core';
 import store from "./store/index";
 import { hideCompany,showCompany } from "./store/actions/index";
+import HomeIcon from '@material-ui/icons/Home';
+
 const useStyles = styles
 window.store = store;
 window.hideCompany = hideCompany;
 window.showCompany = showCompany
 function App() {
   const classes = useStyles();
+  const goBack = ()=>{
+    window.location = "/api/companies"
+  }
   return (
     <>
       <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar,classes.appBarShift)}>
         <Toolbar className={classes.toolbar}>
+        <IconButton onClick={()=>goBack()} aria-label="delete">
+        <Tooltip title="Home">
+          <HomeIcon style={{ color: "white" }} />
+        </Tooltip>
+          </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Companies
           </Typography>

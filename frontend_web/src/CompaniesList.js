@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -18,9 +17,11 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
+import InfoIcon from '@material-ui/icons/Info'
 import Chip from '@material-ui/core/Chip';
 import store from "./store/index";
-import { hideCompany,showCompany } from "./store/actions/index";
+import { hideCompany } from "./store/actions/index";
+import {useToolbarStyles , companiesTableStyle} from './style'
 window.store = store;
 window.hideCompany = hideCompany;
 function descendingComparator(a, b, orderBy) {
@@ -58,7 +59,7 @@ const headCells = [
 
 function EnhancedTableHead(props) {
   
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -66,12 +67,7 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all desserts' }}
-          />
+
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
@@ -103,48 +99,33 @@ EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
 };
 
-const useToolbarStyles = makeStyles((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1),
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark,
-        },
-  title: {
-    flex: '1 1 100%',
-  },
-}));
+
+const loadDeletedItems = ()=>{
+ return localStorage.getItem('hidden_companies') ? JSON.parse(localStorage.getItem('hidden_companies')) : []
+}
+
 function EnhancedTableToolbar(props){
   const classes = useToolbarStyles();
-  const { numSelected,selectedItems } = props;
-  const handleHideRecords = ()=>{
-    selectedItems.forEach(element => {
-      store.dispatch( showCompany({ id: element }) );
-    });
-}
+  const { numSelected } = props;
+  let deleted = loadDeletedItems()
+  const cancelAllDeletion = (e)=> {
+    localStorage.clear();
+    window.location.reload()
+  }
   return (
     <Toolbar
       className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
+        [classes.highlight]: numSelected > 0 || deleted.length > 0,
       })}
     >
-      {numSelected > 0 ? (
+      {numSelected > 0 || deleted.length > 0 ? (
         <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
+          {numSelected || deleted.length } deleted
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
@@ -152,14 +133,14 @@ function EnhancedTableToolbar(props){
         </Typography>
       )}
 
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={handleHideRecords} aria-label="delete">
+      {numSelected > 0 || deleted.length > 0 ? (
+        <Tooltip title="Cancel deletion">
+          <IconButton onClick={()=>cancelAllDeletion()} aria-label="delete">
             <DeleteIcon />
           </IconButton>
         </Tooltip>
-      ) : (        
-        <Chip label="no companies selected" variant="outlined" />     
+      ) : (               
+          <Chip label="no companies hidden"  />     
       )}
     </Toolbar>
   );
@@ -170,32 +151,9 @@ EnhancedTableToolbar.propTypes = {
 
 };
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  paper: {
-    width: '100%',
-    marginBottom: theme.spacing(2),
-  },
-  table: {
-    minWidth: 750,
-  },
-  visuallyHidden: {
-    border: 0,
-    clip: 'rect(0 0 0 0)',
-    height: 1,
-    margin: -1,
-    overflow: 'hidden',
-    padding: 0,
-    position: 'absolute',
-    top: 20,
-    width: 1,
-  },
-}));
 
 export default function CompaniesList(props) {
-  const classes = useStyles();
+  const classes = companiesTableStyle();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
   const [selected, setSelected] = React.useState([]);
@@ -208,15 +166,6 @@ export default function CompaniesList(props) {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = props.companies.map((n) => n.name);
-      setSelected(newSelecteds);
-      
-      return;
-    }
-    setSelected([]);
-  };
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
@@ -244,10 +193,6 @@ export default function CompaniesList(props) {
     props.selectedPage(newPage)
   };
 
-  const handleSetHiddenCompanys = (selectedItems) => {
-    console.log(selectedItems)
-    props.companysTobeHidden(selectedItems)
-  }
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, props.companies.length - page * rowsPerPage);
@@ -268,10 +213,8 @@ export default function CompaniesList(props) {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={props.companies.length}
-              selectedItems={()=>console.log('x')}
             />
             <TableBody>
               {stableSort(props.companies, getComparator(order, orderBy))
@@ -282,8 +225,7 @@ export default function CompaniesList(props) {
 
                   return (
                     <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      hover                    
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
@@ -292,6 +234,7 @@ export default function CompaniesList(props) {
                     >
                       <TableCell padding="checkbox">
                         <Checkbox
+                        onClick={(event) => handleClick(event, row.id)}
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
@@ -302,7 +245,7 @@ export default function CompaniesList(props) {
                       <TableCell align="left">{row.name}</TableCell>
                       <TableCell align="left">{row.source_name}</TableCell>
                       <TableCell align="center">
-                        <Button onClick={companyDetails.bind(this,row)} variant="contained"
+                        <Button  size="small" startIcon={<InfoIcon />} onClick={companyDetails.bind(this,row)} variant="contained"
                          color="primary" disableElevation>
                         Details
                       </Button>
