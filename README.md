@@ -26,7 +26,19 @@ to exit venv
 (env)$ deactivate
 ```
 ### INDICATIONS FOR MATCHING PART
+
 before trying the matching part, make sure that you  have the correct dependecies installed (pandas, numpy, csv, sqlite3).
+The matching algorithm and database insertion are separated in two files under the folder "matching\matching"
+To test the matching algorithm type the command
+
+```bash
+python match_to_csv.py
+```
+
+To import the generated csv's to the sqlite database type the following :
+```bash
+python load_to_db.py
+```
 
 ## Context
 
