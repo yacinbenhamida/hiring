@@ -1,8 +1,23 @@
 # Sharework Developer Test
 
-This test aims at getting an idea about how candidates fit Sharework's standards in terms of software development.
+This is my answer to sharework's developer test.
 
-At Sharework, we do not expect you to master everything we do or use - we are looking for people that will understand what we want to do and will have good ideas about how to do it, so please use whatever you want to show us your skills!
+### INDICATIONS FOR BACKEND
+before starting the django project please follow these instructions : 
+Shell or CMD to the backend root \backend_web
+```bash
+virtualenv env
+```
+
+```bash
+source env/bin/activate OR env\bin\activate for windows
+```
+
+```bash
+(env)$ pip install -r backend\requirements.txt
+```
+### INDICATIONS FOR MATCHING PART
+before trying the matching part, make sure that you  have the correct dependecies installed (pandas, numpy, csv, sqlite3).
 
 ## Context
 
