@@ -32,7 +32,7 @@ class CompanyDetails extends Component {
                     this.setState({isHidden : true})
     }
     fetchData = async (id) => {
-        await Axios.get("http://localhost:8000/companies/"+id)
+        await Axios.get("http://localhost:8000/companies/"+id+"/?format=json")
         .then(res => { 
             this.setState({company : res.data})
             this.loadCurrentCompanyState(id)

@@ -25,3 +25,6 @@ class Matches(models.Model):
                                          null=False, related_name='right_company')
     class Meta:
         db_table = "matches"
+    def __str__(self):
+        return str(self.left_company_id) +" "+ str(self.right_company_id) 
+    

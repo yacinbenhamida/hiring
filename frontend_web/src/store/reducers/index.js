@@ -1,6 +1,7 @@
 const initialState = {
   hidden_companies: []
 };
+// i used redux to centralize the process of saving the hidden companies to localstorage, without resorting to the database
 function rootReducer(state = initialState, action) {
   let hidden_companies =
     localStorage.getItem('hidden_companies') ?

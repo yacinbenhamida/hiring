@@ -1,20 +1,16 @@
 from django.shortcuts import render
-from .serializers import CompaniesSerializer, CompanyDetailsSerializer
+from .serializers import CompaniesSerializer, MatchesSerializer
 from .models import Companies, Matches
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from django.http import HttpResponse, JsonResponse
-# Create your views here.
+from django.db.models import Q
 
 class CompaniesView(viewsets.ModelViewSet):
     queryset = Companies.objects.all().order_by('name')
     serializer_class = CompaniesSerializer
-    
-def companies_details(request,pk):
-    try:
-        company = Companies.objects.get(pk=pk)
-    except Companies.DoesNotExist:
-        return HttpResponse(status=404)
-    
-    if request.method == 'GET':
-        serializer = CompanyDetailsSerializer(company)
-        return JsonResponse(serializer.data) 
+class CompanyMatching(generics.ListAPIView):
+    serializer_class = MatchesSerializer
+    pagination_class = None
+    def get_queryset(self):
+        company = self.kwargs['company']
+        return Matches.objects.filter(Q(left_company_id=company) | Q(right_company_id=company))
