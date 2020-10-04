@@ -10,11 +10,20 @@ virtualenv env
 ```
 
 ```bash
-source env/bin/activate OR env\bin\activate for windows
+source env/bin/activate OR env\Scripts\activate for windows
 ```
 
 ```bash
 (env)$ pip install -r backend\requirements.txt
+```
+to start the backend 
+```bash
+(env)$ python backend\manage.py runserver
+```
+
+to exit venv 
+```bash
+(env)$ deactivate
 ```
 ### INDICATIONS FOR MATCHING PART
 before trying the matching part, make sure that you  have the correct dependecies installed (pandas, numpy, csv, sqlite3).
